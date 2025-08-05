@@ -1,0 +1,37 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Node.js frontend for the Flask backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  }
+}
+{
+  "author": "MADHUSUDAN ",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beheramadhusudan607/frontend.git"
+  }
+}
+{
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "keywords": [
+    "frontend",
+    "nodejs",
+    "express",
+    "axios"
+  ]
+}
+
+  "bugs": {
+    "url": "https://github.com/beheramadhusudan607/frontend/issues"
+  }
