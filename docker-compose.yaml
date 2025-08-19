@@ -1,24 +1,46 @@
-version: '3.8'
+# docker-compose.yml
 
+version: '3.8' # Specifies the Docker Compose file format version
+
+# Define the services (containers) that make up the application
 services:
-  frontend:
-    build: ./frontend
+  # The Node.js frontend service
+  node-frontend:
+    # Build the Docker image for this service
+    build:
+      context: ./frontend # The build context is the 'frontend' directory
+      dockerfile: Dockerfile # The Dockerfile to use
+    container_name: node-frontend-container
+    # Port mapping: Map port 3000 on the host to port 3000 in the container
     ports:
       - "3000:3000"
+    # Set environment variables if needed (none needed for this simple case)
+    environment:
+      - NODE_ENV=production
+    # This service depends on the backend service. Docker Compose will start
+    # the backend before starting the frontend.
     depends_on:
-      - backend
+      - flask-backend
+    # Connect this service to the custom network
     networks:
       - app-network
 
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
+  # The Flask backend service
+  flask-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flask-backend-container
+    # We don't need to map the port to the host since only the frontend needs to access it.
+    # The services communicate over the internal Docker network.
+    # However, you could expose it for direct API testing if you wanted:
+    # ports:
+    #   - "5000:5000"
     networks:
       - app-network
 
+# Define the networks used by the services
 networks:
   app-network:
+    # Use the default bridge driver
     driver: bridge
-# docker-compose.yaml
-# This file defines the services and networks for the application.  

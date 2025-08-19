@@ -1,22 +1,62 @@
+# frontend/Dockerfile
+
+# --- Stage 1: Build ---
 # Use an official Node.js runtime as a parent image
-FROM node:14
+FROM node:18-alpine AS builder
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy package.json and package-lock.json to leverage Docker cache
 COPY package*.json ./
 
 # Install app dependencies
 RUN npm install
 
-# Bundle app source
+# Copy the rest of the application's source code
 COPY . .
 
-# Make port 3000 available to the world outside this container
+# --- Stage 2: Production ---
+# Use a smaller, more secure base image for the final image
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy dependencies from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
+# Copy application code from the builder stage
+COPY --from=builder /app .
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Run the app when the container launches
-CMD [ "node", "server.js" ]
-# Define environment variable
-ENV NODE_ENV production 
+# Define the command to run the application
+CMD ["node", "server.js"]
+
+#################################################################
+
+# backend/Dockerfile
+
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the dependencies file to the working directory
+COPY requirements.txt .
+
+# Install any needed packages specified in requirements.txt
+# --no-cache-dir: Disables the cache, which reduces the image size
+# --trusted-host pypi.python.org: Can help avoid SSL issues in some networks
+RUN pip install --no-cache-dir --trusted-host pypi.python.org -r requirements.txt
+
+# Copy the rest of the application's source code
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Define the command to run the application using Gunicorn (a production-ready server)
+# It runs the 'app' instance from the 'app.py' module.
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

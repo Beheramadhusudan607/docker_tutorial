@@ -1,26 +1,48 @@
+# backend/app.py
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+# Initialize the Flask application
 app = Flask(__name__)
-CORS(app) # This will allow the frontend to make requests to the backend
+# Enable Cross-Origin Resource Sharing (CORS) to allow requests from the frontend
+CORS(app)
+
+@app.route('/')
+def index():
+    """
+    A simple route to confirm the backend is running.
+    """
+    return "Flask Backend is running!"
 
 @app.route('/submit', methods=['POST'])
-def submit():
+def handle_submission():
     """
-    Handles form submission from the frontend.
+    This route handles the form submission from the frontend.
+    It expects a JSON payload with 'name' and 'email'.
     """
-    if request.method == 'POST':
-        data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
+    # Check if the request contains JSON data
+    if not request.is_json:
+        return jsonify({"error": "Missing JSON in request"}), 400
 
-        if not name or not email:
-            return jsonify({'error': 'Missing name or email'}), 400
+    # Get the JSON data from the request
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
 
-        # Process the data (e.g., save to a database)
-        print(f"Received data: Name - {name}, Email - {email}")
+    # Basic validation
+    if not name or not email:
+        return jsonify({"error": "Name and email are required"}), 400
 
-        return jsonify({'message': f'Hello, {name}! Your form has been submitted successfully.'})
+    # Process the data (in a real app, you might save this to a database)
+    print(f"Received data: Name - {name}, Email - {email}")
 
+    # Send a success response back to the frontend
+    response_message = f"Hello, {name}! Your form was submitted successfully with the email {email}."
+    return jsonify({"message": response_message})
+
+# Run the Flask app
 if __name__ == '__main__':
+    # Listen on all available network interfaces and port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
+# This allows the app to be run directly with `python app.py`   
